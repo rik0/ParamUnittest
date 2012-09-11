@@ -5,8 +5,12 @@ version = '0.1'
 
 setup(name='ParamUnittest',
       version=version,
-      description="Simple TestCase to have parametrized unit tests.",
+      description="Simple unittest extension to have parametrized unit tests.",
       long_description="""\
+      This package allows to create parametrized unit-tests that work with the
+      standard unittest package. A parametrized test case is automatically converted
+      to multiple test cases. Since they are TestCase subclasses, they work with
+      other test suites that recognize TestCases.
 """,
       classifiers=[], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
       keywords='unittest',
