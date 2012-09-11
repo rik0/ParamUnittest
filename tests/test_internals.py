@@ -1,6 +1,6 @@
 import unittest
 
-from paramunittest.core import _process_parameters
+from paramunittest.core import _process_parameters, ParametrizedTestCase, parametrized
 
 class TestProcessParametersSeq(unittest.TestCase):
     def testDictOnly(self):
@@ -32,3 +32,22 @@ class TestProcessParametersSeq(unittest.TestCase):
         ]
 
         self.assertListEqual(parameters, _process_parameters(parameters))
+
+def define_subclassing_test_case():
+    @parametrized()
+    class Parametrized(ParametrizedTestCase):
+        def test(self):
+            self.fail()
+    return Parametrized
+
+class TestParametrizeRequiresParametrizedTestCase(unittest.TestCase):
+    def test(self):
+        with self.assertRaises(Exception):
+            @parametrized()
+            class NonParametrized(unittest.TestCase):
+                def test(self):
+                    self.fail()
+
+    @unittest.skip
+    def testCorrect(self):
+        self.assertIsNone(define_subclassing_test_case())

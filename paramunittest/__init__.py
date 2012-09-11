@@ -1,2 +1,2 @@
 
-from .core import ParamTestCase
+from .core import parametrized, ParametrizedTestCase
