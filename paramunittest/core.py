@@ -1,8 +1,7 @@
 import unittest
 import collections
 import importlib
-import exceptions
-import sys
+
 
 def _process_parameters(parameters_seq):
     processed_parameters_seq = []
@@ -17,9 +16,11 @@ def _process_parameters(parameters_seq):
             processed_parameters_seq.append((tuple(parameters), dict()))
     return processed_parameters_seq
 
+
 class ParametrizedTestCase(unittest.TestCase):
-    def __init__(self):
-        raise NotImplementedError('__init__ must be implemented because it receives the parameters.')
+    def setParameters(self, *args, **kwargs):
+        raise NotImplementedError('setParameters must be implemented because it receives the parameters.')
+
 
 def parametrized(*parameters_seq):
     parameters_seq = _process_parameters(parameters_seq)
@@ -27,10 +28,15 @@ def parametrized(*parameters_seq):
         if not issubclass(cls, ParametrizedTestCase):
             raise TypeError('%s does not subclass %s' % (cls.__name__, ParametrizedTestCase.__name__))
         module = importlib.import_module(cls.__module__)
-#        import sys
-#        print >> sys.stderr, cls
-#        print >> sys.stderr, cls.__module__
-#        print >> sys.stderr, importlib.import_module(cls.__module__)
-#        print >> sys.stderr, dir(cls)
+        for index, parameters in enumerate(parameters_seq):
+            name = '%s_%d' % (cls.__name__, index)
+            def closing_over(parameters=parameters):
+                def setUp(self):
+                    self.setParameters(*parameters[0], **parameters[1])
+                    cls.setUp(self)
+                return setUp
+            set_up = closing_over()
+            new_class = type(name, (cls, ), {'setUp': set_up})
+            setattr(module, name, new_class)
         return None # this is explicit!
     return magic_module_set_test_case
