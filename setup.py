@@ -1,5 +1,4 @@
 from setuptools import setup, find_packages
-import sys, os
 from os import path
 
 
@@ -12,7 +11,7 @@ def example_text(examples_directory=examples_directory,
                  example_filename=example_filename):
     rel_path = path.join(examples_directory, example_filename)
     with open(rel_path) as fh:
-        return fh.read()
+        return "    ".join(fh.readlines())
 
 long_description  = """\
 This package allows to create parametrized unit-tests that work with the
@@ -20,11 +19,10 @@ standard unittest package. A parametrized test case is automatically
 converted to multiple test cases. Since they are TestCase subclasses,
 they work with other test suites that recognize TestCases.
 
+Examples::
 
-== Examples ==
-
-%s
-      """ % example_text()
+    %s
+""" % example_text()
 
 
 setup(name='ParamUnittest',
@@ -33,6 +31,11 @@ setup(name='ParamUnittest',
       long_description=long_description,
       classifiers=[
         'Topic :: Software Development :: Testing',
+        'Development Status :: 4 - Beta',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: BSD License',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python :: 2.7',
       ],
       # Get strings from
       # http://pypi.python.org/pypi?%3Aaction=list_classifiers
