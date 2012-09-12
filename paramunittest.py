@@ -2,6 +2,10 @@ import unittest
 import collections
 import importlib
 
+__all__ = [
+    'parametrized',
+    'ParametrizedTestCase',
+]
 
 def _process_parameters(parameters_seq):
     processed_parameters_seq = []
