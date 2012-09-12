@@ -1,17 +1,7 @@
-from setuptools import setup, find_packages
-from os import path
+from setuptools import setup
 
 
 version = '0.1'
-
-examples_directory = 'examples'
-example_filename = 'example.py'
-
-def example_text(examples_directory=examples_directory,
-                 example_filename=example_filename):
-    rel_path = path.join(examples_directory, example_filename)
-    with open(rel_path) as fh:
-        return "    ".join(fh.readlines())
 
 long_description  = """\
 This package allows to create parametrized unit-tests that work with the
@@ -21,8 +11,42 @@ they work with other test suites that recognize TestCases.
 
 Examples::
 
-    %s
-""" % example_text()
+    import unittest
+    import paramunittest
+
+    @paramunittest.parametrized(
+        ('1', '2'),
+        #(4, 3),
+        ('2', '3'),
+        (('4', ), {'b': '5'}),
+        ((), {'a': 5, 'b': 6}),
+        {'a': 5, 'b': 6},
+    )
+    class TestFoo(paramunittest.ParametrizedTestCase):
+        def setParameters(self, a, b):
+            self.a = a
+            self.b = b
+
+        def testLess(self):
+            self.assertLess(self.a, self.b)
+
+    @paramunittest.parametrized(
+        ('1', '2'),
+        #(4, 3),
+        ('2', '3'),
+        (('4', ), {'b': '5'}),
+        ((), {'a': 5, 'b': 6}),
+        {'a': 5, 'b': 6},
+    )
+    class TestBar(unittest.TestCase):
+        def setParameters(self, a, b):
+            self.a = a
+            self.b = b
+
+        def testLess(self):
+            self.assertLess(self.a, self.b)
+
+"""
 
 
 setup(name='ParamUnittest',
@@ -45,12 +69,4 @@ setup(name='ParamUnittest',
       url='https://github.com/rik0/ParamUnittest',
       license='BSD',
       py_modules = ['paramunittest', ],
-      include_package_data=True,
-      zip_safe=False,
-      install_requires=[
-          # -*- Extra requirements: -*-
-      ],
-      entry_points="""
-      # -*- Entry points: -*-
-      """,
       )
