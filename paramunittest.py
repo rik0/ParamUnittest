@@ -7,29 +7,39 @@ def _process_parameters(parameters_seq):
     processed_parameters_seq = []
     for parameters in parameters_seq:
         if isinstance(parameters, collections.Mapping):
-            processed_parameters_seq.append((tuple(), dict(parameters)))
+            processed_parameters_seq.append((tuple(),
+                                             dict(parameters)))
         elif (len(parameters) == 2
               and isinstance(parameters[0], collections.Sequence)
               and isinstance(parameters[1], collections.Mapping)):
-            processed_parameters_seq.append((tuple(parameters[0]), dict(parameters[1])))
+            processed_parameters_seq.append((tuple(parameters[0]),
+                                             dict(parameters[1])))
         else:
-            processed_parameters_seq.append((tuple(parameters), dict()))
+            processed_parameters_seq.append((tuple(parameters),
+                                             dict()))
     return processed_parameters_seq
+
+
+def _build_name(name, index):
+    return '%s_%d' % (name, index)
 
 
 class ParametrizedTestCase(unittest.TestCase):
     def setParameters(self, *args, **kwargs):
-        raise NotImplementedError('setParameters must be implemented because it receives the parameters.')
+        raise NotImplementedError(
+            ('setParameters must be implemented '
+             'because it receives the parameters.'))
 
 
 def parametrized(*parameters_seq):
     parameters_seq = _process_parameters(parameters_seq)
     def magic_module_set_test_case(cls):
-        if not issubclass(cls, ParametrizedTestCase):
-            raise TypeError('%s does not subclass %s' % (cls.__name__, ParametrizedTestCase.__name__))
+        if not hasattr(cls, 'setParameters'):
+            raise TypeError('%s does not have a setParameters method.' % (
+                cls.__name__, ))
         module = importlib.import_module(cls.__module__)
         for index, parameters in enumerate(parameters_seq):
-            name = '%s_%d' % (cls.__name__, index)
+            name = _build_name(cls.__name__, index)
             def closing_over(parameters=parameters):
                 def setUp(self):
                     self.setParameters(*parameters[0], **parameters[1])
