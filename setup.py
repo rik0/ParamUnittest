@@ -44,7 +44,7 @@ setup(name='ParamUnittest',
       author_email='enrico.franchi@gmail.com',
       url='https://github.com/rik0/ParamUnittest',
       license='BSD',
-      packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
+      py_modules = ['paramunittest', ],
       include_package_data=True,
       zip_safe=False,
       install_requires=[
