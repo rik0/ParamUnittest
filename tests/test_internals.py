@@ -80,3 +80,13 @@ class TestGetParameters(ParametrizedTestCase):
 
     def testFullList(self):
         self.assertListEqual(self.parameters, self.getFullParametersSequence())
+
+    def testRepr(self):
+        self.assertIn(str(self.getParameters()), repr(self))
+        self.assertIn(self.__class__.__name__, repr(self))
+        self.assertIn(str(self.getTestCaseIndex()), repr(self))
+
+    def testStr(self):
+        self.assertIn(str(self.getParameters()), str(self))
+        self.assertIn(self.__class__.__name__, str(self))
+        self.assertIn(str(self.getTestCaseIndex()), str(self))

@@ -63,11 +63,16 @@ class ParametrizedTestCase(unittest.TestCase):
             'getFullParametersSequence should have been patched by parametrized.')
 
     def __str__(self):
-        return "%s (%s)" % (self._testMethodName, strclass(self.__class__))
+        return "%s[%d](%s) (%s)" % (self._testMethodName,
+                                    self.getTestCaseIndex(),
+                                    self.getParameters(),
+                                    strclass(self.__class__))
 
     def __repr__(self):
-        return "<%s testMethod=%s>" % \
-               (strclass(self.__class__), self._testMethodName)
+        return "<%s[%d](%s) testMethod=%s>" % (strclass(self.__class__),
+                                               self.getTestCaseIndex(),
+                                               self.getParameters(),
+                                               self._testMethodName)
 
 
 def parametrized(*parameters_seq):
