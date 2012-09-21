@@ -1,7 +1,7 @@
 from setuptools import setup
 
 
-version = '0.1'
+version = '0.2'
 
 long_description  = """\
 This package allows to create parametrized unit-tests that work with the

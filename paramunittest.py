@@ -1,6 +1,7 @@
 import unittest
 import collections
 import importlib
+from unittest.util import strclass
 
 __all__ = [
     'parametrized',
@@ -34,6 +35,21 @@ class ParametrizedTestCase(unittest.TestCase):
             ('setParameters must be implemented '
              'because it receives the parameters.'))
 
+    def getParameters(self, *args, **kwargs):
+        raise NotImplementedError(
+            ('getParameters should have been patched by parametrized.'))
+
+    def getTestCaseIndex(self, *args, **kwargs):
+        raise NotImplementedError(
+            ('getTestCaseIndex should have been patched by parametrized.'))
+
+    def __str__(self):
+        return "%s (%s)" % (self._testMethodName, strclass(self.__class__))
+
+    def __repr__(self):
+        return "<%s testMethod=%s>" % \
+               (strclass(self.__class__), self._testMethodName)
+
 
 def parametrized(*parameters_seq):
     parameters_seq = _process_parameters(parameters_seq)
@@ -44,13 +60,20 @@ def parametrized(*parameters_seq):
         module = importlib.import_module(cls.__module__)
         for index, parameters in enumerate(parameters_seq):
             name = _build_name(cls.__name__, index)
-            def closing_over(parameters=parameters):
+            def closing_over(parameters=parameters, index=index):
                 def setUp(self):
                     self.setParameters(*parameters[0], **parameters[1])
                     cls.setUp(self)
-                return setUp
-            set_up = closing_over()
-            new_class = type(name, (cls, ), {'setUp': set_up})
+                def getParameters(self):
+                    return parameters
+                def getTestCaseIndex(self):
+                    return index
+                return setUp, getParameters, getTestCaseIndex
+            set_up, get_parameters, get_test_case_index = closing_over()
+            new_class = type(name, (cls, ),
+                             {'setUp': set_up,
+                              'getParameters': get_parameters,
+                              'getTestCaseIndex': get_test_case_index})
             setattr(module, name, new_class)
         return None # this is explicit!
     return magic_module_set_test_case

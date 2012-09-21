@@ -58,3 +58,20 @@ class TestParametrizeRequiresSetParameters(unittest.TestCase):
                 self.fail()
         self.assertIsNone(Parametrized)
 
+
+some_different_parameters = [
+    (0, ),
+    (0, 1),
+    ('foo', 'bar', 'baz'),
+]
+@parametrized(*some_different_parameters)
+class TestGetParameters(ParametrizedTestCase):
+    def setParameters(self, *args, **kwargs):
+        pass
+
+    def testGotParameters(self):
+        self.assertTupleEqual(
+            _process_parameters(some_different_parameters)[self.getTestCaseIndex()],
+            self.getParameters()
+        )
+
