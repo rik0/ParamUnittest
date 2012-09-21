@@ -78,3 +78,5 @@ class TestGetParameters(ParametrizedTestCase):
             self.getParameters()
         )
 
+    def testFullList(self):
+        self.assertListEqual(self.parameters, self.getFullParametersSequence())

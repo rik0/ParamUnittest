@@ -1,3 +1,4 @@
+import copy
 import unittest
 import collections
 import importlib
@@ -35,13 +36,31 @@ class ParametrizedTestCase(unittest.TestCase):
             ('setParameters must be implemented '
              'because it receives the parameters.'))
 
-    def getParameters(self, *args, **kwargs):
+    def getParameters(self):
+        """
+        Return the parameters with which this test case was instantiated.
+        """
         raise NotImplementedError(
-            ('getParameters should have been patched by parametrized.'))
+            'getParameters should have been patched by parametrized.')
 
-    def getTestCaseIndex(self, *args, **kwargs):
+    def getFullParametersSequence(self):
         raise NotImplementedError(
-            ('getTestCaseIndex should have been patched by parametrized.'))
+            'getFullParametersSequence should have been patched by parametrized.')
+
+    def getTestCaseIndex(self):
+        """
+        Return the index of the current test case according to the list of
+        parametes passed to parametrized.
+        """
+        raise NotImplementedError(
+            'getTestCaseIndex should have been patched by parametrized.')
+
+    def getFullParametersSequence(self):
+        """
+        Return the full normalized list of parameters passed to parametrized.
+        """
+        raise NotImplementedError(
+            'getFullParametersSequence should have been patched by parametrized.')
 
     def __str__(self):
         return "%s (%s)" % (self._testMethodName, strclass(self.__class__))
@@ -65,15 +84,30 @@ def parametrized(*parameters_seq):
                     self.setParameters(*parameters[0], **parameters[1])
                     cls.setUp(self)
                 def getParameters(self):
+                    """
+                    Return the parameters with which this test case was instantiated.
+                    """
                     return parameters
                 def getTestCaseIndex(self):
+                    """
+                    Return the index of the current test case according to the list of
+                    parametes passed to parametrized.
+                    """
                     return index
-                return setUp, getParameters, getTestCaseIndex
-            set_up, get_parameters, get_test_case_index = closing_over()
+                def getFullParametersSequence(self):
+                    """
+                    Return the full normalized list of parameters passed to parametrized.
+                    """
+                    return copy.copy(parameters_seq)
+                return setUp, getParameters, getTestCaseIndex, getFullParametersSequence
+            (set_up, get_parameters,
+             get_test_case_index,
+             get_full_parameters_sequence) = closing_over()
             new_class = type(name, (cls, ),
                              {'setUp': set_up,
                               'getParameters': get_parameters,
-                              'getTestCaseIndex': get_test_case_index})
+                              'getTestCaseIndex': get_test_case_index,
+                              'getFullParametersSequence': get_full_parameters_sequence})
             setattr(module, name, new_class)
         return None # this is explicit!
     return magic_module_set_test_case
