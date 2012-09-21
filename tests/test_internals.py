@@ -69,9 +69,12 @@ class TestGetParameters(ParametrizedTestCase):
     def setParameters(self, *args, **kwargs):
         pass
 
+    def setUp(self):
+        self.parameters = _process_parameters(some_different_parameters)
+
     def testGotParameters(self):
         self.assertTupleEqual(
-            _process_parameters(some_different_parameters)[self.getTestCaseIndex()],
+            self.parameters[self.getTestCaseIndex()],
             self.getParameters()
         )
 
