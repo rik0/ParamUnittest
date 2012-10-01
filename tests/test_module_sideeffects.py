@@ -28,7 +28,6 @@ class TestSideEffects(unittest.TestCase):
                      '%s has not attribute %s' % (obj, name))
 
     def testModuleGotMoreTests(self):
-        self.assertIsNone(self.integer_test)
         for index, _param in enumerate(self.parameters_tuple):
             test_name = _build_name(self.integer_test_name, index)
             self.assertHasAttr(self.module, test_name)

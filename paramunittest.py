@@ -78,6 +78,26 @@ class ParametrizedTestCase(unittest.TestCase):
                                                self._testMethodName)
 
 
+
+class PropagateSetAttr(type):
+    def __new__(mcs, name, bases, dct):
+        dct['setattr_observers'] = []
+        cls = super(PropagateSetAttr, mcs).__new__(mcs, name, bases, dct)
+        return cls
+
+    def __setattr__(cls, key, value):
+        for observer in cls.setattr_observers:
+            setattr(observer, key, value)
+
+
+
+def make_propagator(cls, setattr_observers):
+    class SkippableTest(unittest.TestCase):
+        __metaclass__ = PropagateSetAttr
+    SkippableTest.setattr_observers.extend(setattr_observers)
+    return SkippableTest
+
+
 def parametrized(*parameters_seq):
     parameters_seq = _process_parameters(parameters_seq)
     def magic_module_set_test_case(cls):
@@ -85,6 +105,7 @@ def parametrized(*parameters_seq):
             raise TypeError('%s does not have a setParameters method.' % (
                 cls.__name__, ))
         module = importlib.import_module(cls.__module__)
+        generated_test_cases = []
         for index, parameters in enumerate(parameters_seq):
             name = _build_name(cls.__name__, index)
             def closing_over(parameters=parameters, index=index):
@@ -116,6 +137,7 @@ def parametrized(*parameters_seq):
                               'getParameters': get_parameters,
                               'getTestCaseIndex': get_test_case_index,
                               'getFullParametersSequence': get_full_parameters_sequence})
+            generated_test_cases.append(new_class)
             setattr(module, name, new_class)
-        return None # this is explicit!
+        return make_propagator(cls, generated_test_cases)
     return magic_module_set_test_case

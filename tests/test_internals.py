@@ -49,14 +49,16 @@ class TestParametrizeRequiresSetParameters(unittest.TestCase):
 
             def test(self):
                 self.fail()
-        self.assertIsNone(NonParametrized)
+        self.assert_(issubclass(NonParametrized, unittest.TestCase))
+        self.assertFalse(hasattr(NonParametrized, 'test'))
 
     def testWithParametrizedTestCase(self):
         @parametrized()
         class Parametrized(ParametrizedTestCase):
             def test(self):
                 self.fail()
-        self.assertIsNone(Parametrized)
+        self.assert_(issubclass(Parametrized, unittest.TestCase))
+        self.assertFalse(hasattr(Parametrized, 'test'))
 
 
 some_different_parameters = [
