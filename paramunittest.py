@@ -2,7 +2,6 @@ import copy
 import unittest
 import collections
 import importlib
-from unittest.util import strclass
 
 __all__ = [
     'parametrized',
@@ -28,6 +27,10 @@ def _process_parameters(parameters_seq):
 
 def _build_name(name, index):
     return '%s_%d' % (name, index)
+
+
+def strclass(cls):
+    return "%s.%s" % (cls.__module__, cls.__name__) 
 
 
 class ParametrizedTestCase(unittest.TestCase):
