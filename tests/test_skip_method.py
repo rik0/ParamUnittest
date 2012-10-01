@@ -7,6 +7,6 @@ import paramunittest
    (2, ),
 )
 class TrySkipMethod(paramunittest.ParametrizedTestCase):
-    @skip("Always fails!")
+    @skip("Method Always fails!")
     def testFalse(self):
-        self.assert_(False)
+        self.fail()
