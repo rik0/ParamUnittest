@@ -12,7 +12,6 @@ class TestSkipLast(ParametrizedTestCase):
     def testFalse(self):
         self.fail()
 
-# TODO: Fix this, because it is broken!
 
 @unittest.skip("Always fails!")
 @parametrized(
@@ -26,3 +25,10 @@ class TestSkipFirst(ParametrizedTestCase):
 
     def testFalse(self):
         self.fail()
+
+
+@parametrized((1,))
+@unittest.skipIf(True, "Should skip it.")
+class TestSkipSubclass(TestSkipLast):
+    pass
+
