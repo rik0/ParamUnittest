@@ -27,6 +27,8 @@ class TestSkipFirst(ParametrizedTestCase):
         self.fail()
 
 
+# TODO: Fix it because it is broken!
+
 @parametrized((1,))
 @unittest.skipIf(True, "Should skip it.")
 class TestSkipSubclass(TestSkipLast):
