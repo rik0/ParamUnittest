@@ -12,3 +12,8 @@ class TestBase(ParametrizedTestCase):
 class TestSubClass(TestBase):
     def testOk2(self):
         self.assert_(True)
+
+
+@parametrized((3, ))
+class TestDifferentParametersSubclass(TestBase):
+    pass  # everything it needs should be inherited from TestBase
