@@ -30,7 +30,7 @@ def _build_name(name, index):
 
 
 def strclass(cls):
-    return "%s.%s" % (cls.__module__, cls.__name__) 
+    return "%s.%s" % (cls.__module__, cls.__name__)
 
 
 class ParametrizedTestCase(unittest.TestCase):
@@ -73,7 +73,7 @@ class ParametrizedTestCase(unittest.TestCase):
                                         strclass(self.__class__))
         except NotImplementedError:
             return "%s[...](...) (%s)" % (self._testMethodName,
-                                        strclass(self.__class__))
+                                          strclass(self.__class__))
 
     def __repr__(self):
         try:
@@ -83,7 +83,7 @@ class ParametrizedTestCase(unittest.TestCase):
                                                    self._testMethodName)
         except NotImplementedError:
             return "<%s[...](...) testMethod=%s>" % (strclass(self.__class__),
-                                                   self._testMethodName)
+                                                     self._testMethodName)
 
 
 class PropagateSetAttr(type):
@@ -99,9 +99,8 @@ class PropagateSetAttr(type):
             setattr(observer, key, value)
 
 
-
 def make_propagator(cls, setattr_observers):
-    SkippableTest = PropagateSetAttr('Skippable'+cls.__name__, (cls,),
+    SkippableTest = PropagateSetAttr('Skippable' + cls.__name__, (cls,),
                                      {'__unittest_skip__': True,
                                       '__unittest_skip_why__': PropagateSetAttr.PARAMETRIZED_ORIGINAL})
     SkippableTest.setattr_observers.extend(setattr_observers)
@@ -110,6 +109,7 @@ def make_propagator(cls, setattr_observers):
 
 def parametrized(*parameters_seq):
     parameters_seq = _process_parameters(parameters_seq)
+
     def magic_module_set_test_case(cls):
         if not hasattr(cls, 'setParameters'):
             raise TypeError('%s does not have a setParameters method.' % (
@@ -118,39 +118,48 @@ def parametrized(*parameters_seq):
         generated_test_cases = []
         for index, parameters in enumerate(parameters_seq):
             name = _build_name(cls.__name__, index)
+
             def closing_over(parameters=parameters, index=index):
                 def setUp(self):
                     self.setParameters(*parameters[0], **parameters[1])
                     cls.setUp(self)
+
                 def getParameters(self):
                     """
                     Return the parameters with which this test case was instantiated.
                     """
                     return parameters
+
                 def getTestCaseIndex(self):
                     """
                     Return the index of the current test case according to the list of
                     parametes passed to parametrized.
                     """
                     return index
+
                 def getFullParametersSequence(self):
                     """
                     Return the full normalized list of parameters passed to parametrized.
                     """
                     return copy.copy(parameters_seq)
+
                 return setUp, getParameters, getTestCaseIndex, getFullParametersSequence
+
             (set_up, get_parameters,
              get_test_case_index,
              get_full_parameters_sequence) = closing_over()
-            new_class = type(name, (cls, ),
-                             {'setUp': set_up,
+            new_attributes = {'setUp': set_up,
                               'getParameters': get_parameters,
                               'getTestCaseIndex': get_test_case_index,
-                              'getFullParametersSequence': get_full_parameters_sequence,
-                              '__unittest_skip__': False,
-                              '__unittest_skip_why__': 'Generated Parametrized Test'})
+                              'getFullParametersSequence': get_full_parameters_sequence, }
+            if (getattr(cls, '__unittest_skip__', False) and
+                getattr(cls, '__unittest_skip_why__', object()) == PropagateSetAttr.PARAMETRIZED_ORIGINAL):
+                new_attributes.update({'__unittest_skip__': False,
+                                       '__unittest_skip_why__': 'Generated Parametrized Test'})
+            new_class = type(name, (cls, ), new_attributes)
 
             generated_test_cases.append(new_class)
             setattr(module, name, new_class)
         return make_propagator(cls, generated_test_cases)
+
     return magic_module_set_test_case
