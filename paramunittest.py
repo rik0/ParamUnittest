@@ -86,7 +86,6 @@ class ParametrizedTestCase(unittest.TestCase):
                                                    self._testMethodName)
 
 
-
 class PropagateSetAttr(type):
     PARAMETRIZED_ORIGINAL = 'Skip parametrized original'
 
