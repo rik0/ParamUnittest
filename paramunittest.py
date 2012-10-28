@@ -66,20 +66,30 @@ class ParametrizedTestCase(unittest.TestCase):
             'getFullParametersSequence should have been patched by parametrized.')
 
     def __str__(self):
-        return "%s[%d](%s) (%s)" % (self._testMethodName,
-                                    self.getTestCaseIndex(),
-                                    self.getParameters(),
-                                    strclass(self.__class__))
+        try:
+            return "%s[%d](%s) (%s)" % (self._testMethodName,
+                                        self.getTestCaseIndex(),
+                                        self.getParameters(),
+                                        strclass(self.__class__))
+        except NotImplementedError:
+            return "%s[...](...) (%s)" % (self._testMethodName,
+                                        strclass(self.__class__))
 
     def __repr__(self):
-        return "<%s[%d](%s) testMethod=%s>" % (strclass(self.__class__),
-                                               self.getTestCaseIndex(),
-                                               self.getParameters(),
-                                               self._testMethodName)
+        try:
+            return "<%s[%d](%s) testMethod=%s>" % (strclass(self.__class__),
+                                                   self.getTestCaseIndex(),
+                                                   self.getParameters(),
+                                                   self._testMethodName)
+        except NotImplementedError:
+            return "<%s[...](...) testMethod=%s>" % (strclass(self.__class__),
+                                                   self._testMethodName)
 
 
 
 class PropagateSetAttr(type):
+    PARAMETRIZED_ORIGINAL = 'Skip parametrized original'
+
     def __new__(mcs, name, bases, dct):
         dct['setattr_observers'] = []
         cls = super(PropagateSetAttr, mcs).__new__(mcs, name, bases, dct)
@@ -92,8 +102,9 @@ class PropagateSetAttr(type):
 
 
 def make_propagator(cls, setattr_observers):
-    SkippableTest = PropagateSetAttr('SkippableTest', (unittest.TestCase,),
-                                     {})
+    SkippableTest = PropagateSetAttr('Skippable'+cls.__name__, (cls,),
+                                     {'__unittest_skip__': True,
+                                      '__unittest_skip_why__': PropagateSetAttr.PARAMETRIZED_ORIGINAL})
     SkippableTest.setattr_observers.extend(setattr_observers)
     return SkippableTest
 
@@ -136,7 +147,10 @@ def parametrized(*parameters_seq):
                              {'setUp': set_up,
                               'getParameters': get_parameters,
                               'getTestCaseIndex': get_test_case_index,
-                              'getFullParametersSequence': get_full_parameters_sequence})
+                              'getFullParametersSequence': get_full_parameters_sequence,
+                              '__unittest_skip__': False,
+                              '__unittest_skip_why__': 'Generated Parametrized Test'})
+
             generated_test_cases.append(new_class)
             setattr(module, name, new_class)
         return make_propagator(cls, generated_test_cases)
